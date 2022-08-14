@@ -46,8 +46,7 @@ pub fn main() !void {
     mainLoop: while (true) {
         var event: c.SDL_Event = undefined;
         while (c.SDL_PollEvent(&event) != 0) {
-            const eventType = event.@"type";
-            switch (eventType) {
+            switch (event.@"type") {
                 c.SDL_QUIT => break :mainLoop,
                 else => {},
             }
