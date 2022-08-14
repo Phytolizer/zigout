@@ -33,6 +33,35 @@ fn createRenderer(window: *c.SDL_Window) !*c.SDL_Renderer {
     };
 }
 
+const Color = struct {
+    r: u8,
+    g: u8,
+    b: u8,
+    a: u8 = 255,
+};
+
+fn hexColor(color: u32) Color {
+    return .{
+        .r = @truncate(u8, color >> 24),
+        .g = @truncate(u8, color >> 16),
+        .b = @truncate(u8, color >> 8),
+        .a = @truncate(u8, color),
+    };
+}
+
+fn setRenderDrawColor(renderer: *c.SDL_Renderer, rgba: Color) !void {
+    if (c.SDL_SetRenderDrawColor(
+        renderer,
+        rgba.r,
+        rgba.g,
+        rgba.b,
+        rgba.a,
+    ) != 0) {
+        std.debug.print("SDL_SetRenderDrawColor error: {s}\n", .{c.SDL_GetError()});
+        return error.SetRenderDrawColorFailed;
+    }
+}
+
 pub fn main() !void {
     try initSdl();
     defer c.SDL_Quit();
@@ -50,7 +79,7 @@ pub fn main() !void {
             }
         }
 
-        _ = c.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        try setRenderDrawColor(renderer, hexColor(0xFF00FFFF));
         _ = c.SDL_RenderClear(renderer);
         c.SDL_RenderPresent(renderer);
     }
