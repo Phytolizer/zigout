@@ -1,5 +1,7 @@
 const std = @import("std");
+const builtin = @import("builtin");
 const c = @import("sdl2api/sdl.zig");
+const endianness = builtin.target.cpu.arch.endian();
 
 fn initSdl() !void {
     if (c.SDL_Init(c.SDL_INIT_VIDEO) != 0) {
@@ -41,11 +43,19 @@ const Color = struct {
 };
 
 fn hexColor(color: u32) Color {
-    return .{
-        .r = @truncate(u8, color >> 24),
-        .g = @truncate(u8, color >> 16),
-        .b = @truncate(u8, color >> 8),
-        .a = @truncate(u8, color),
+    return switch (endianness) {
+        .Little => .{
+            .r = @truncate(u8, color >> 24),
+            .g = @truncate(u8, color >> 16),
+            .b = @truncate(u8, color >> 8),
+            .a = @truncate(u8, color),
+        },
+        .Big => .{
+            .r = @truncate(u8, color),
+            .g = @truncate(u8, color >> 8),
+            .b = @truncate(u8, color >> 16),
+            .a = @truncate(u8, color >> 24),
+        },
     };
 }
 
@@ -69,6 +79,13 @@ fn renderClear(renderer: *c.SDL_Renderer) !void {
     }
 }
 
+fn renderFillRect(renderer: *c.SDL_Renderer, rect: *const c.SDL_Rect) !void {
+    if (c.SDL_RenderFillRect(renderer, rect) != 0) {
+        std.debug.print("SDL_RenderFillRect error: {s}\n", .{c.SDL_GetError()});
+        return error.RenderFillRectFailed;
+    }
+}
+
 pub fn main() !void {
     try initSdl();
     defer c.SDL_Quit();
@@ -88,6 +105,16 @@ pub fn main() !void {
 
         try setRenderDrawColor(renderer, hexColor(0x181818FF));
         try renderClear(renderer);
+
+        const rect = c.SDL_Rect{
+            .x = 0,
+            .y = 0,
+            .w = 100,
+            .h = 100,
+        };
+        try setRenderDrawColor(renderer, hexColor(0xFF0000FF));
+        try renderFillRect(renderer, &rect);
+
         c.SDL_RenderPresent(renderer);
     }
 }
