@@ -3,6 +3,13 @@ const c = @cImport({
     @cInclude("SDL2/SDL.h");
 });
 
+fn initSdl() !void {
+    if (c.SDL_Init(c.SDL_INIT_VIDEO) != 0) {
+        std.debug.print("SDL_Init error: {s}\n", .{c.SDL_GetError()});
+        return error.SdlInitializationFailed;
+    }
+}
+
 fn createWindow() !*c.SDL_Window {
     const window = c.SDL_CreateWindow(
         "Hello, World!",
@@ -33,10 +40,7 @@ fn createRenderer(window: *c.SDL_Window) !*c.SDL_Renderer {
 }
 
 pub fn main() !void {
-    if (c.SDL_Init(c.SDL_INIT_VIDEO) != 0) {
-        std.debug.print("SDL_Init error: {s}\n", .{c.SDL_GetError()});
-        return error.SdlInitializationFailed;
-    }
+    try initSdl();
     defer c.SDL_Quit();
     const window = try createWindow();
     defer c.SDL_DestroyWindow(window);
