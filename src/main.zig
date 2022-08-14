@@ -62,6 +62,13 @@ fn setRenderDrawColor(renderer: *c.SDL_Renderer, rgba: Color) !void {
     }
 }
 
+fn renderClear(renderer: *c.SDL_Renderer) !void {
+    if (c.SDL_RenderClear(renderer) != 0) {
+        std.debug.print("SDL_RenderClear error: {s}\n", .{c.SDL_GetError()});
+        return error.RenderClearFailed;
+    }
+}
+
 pub fn main() !void {
     try initSdl();
     defer c.SDL_Quit();
@@ -80,7 +87,7 @@ pub fn main() !void {
         }
 
         try setRenderDrawColor(renderer, hexColor(0x181818FF));
-        _ = c.SDL_RenderClear(renderer);
+        try renderClear(renderer);
         c.SDL_RenderPresent(renderer);
     }
 }
