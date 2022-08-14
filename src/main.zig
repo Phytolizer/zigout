@@ -79,7 +79,7 @@ pub fn main() !void {
             }
         }
 
-        try setRenderDrawColor(renderer, hexColor(0x181818Ff));
+        try setRenderDrawColor(renderer, hexColor(0x181818FF));
         _ = c.SDL_RenderClear(renderer);
         c.SDL_RenderPresent(renderer);
     }
