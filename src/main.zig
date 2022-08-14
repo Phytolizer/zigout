@@ -11,32 +11,28 @@ fn initSdl() !void {
 }
 
 fn createWindow() !*c.SDL_Window {
-    const window = c.SDL_CreateWindow(
+    return c.SDL_CreateWindow(
         "Hello, World!",
         c.SDL_WINDOWPOS_UNDEFINED,
         c.SDL_WINDOWPOS_UNDEFINED,
         640,
         480,
         c.SDL_WINDOW_SHOWN,
-    );
-    if (window) |w| {
-        return w;
-    }
-    std.debug.print("SDL_CreateWindow error: {s}\n", .{c.SDL_GetError()});
-    return error.WindowCreationFailed;
+    ) orelse {
+        std.debug.print("SDL_CreateWindow error: {s}\n", .{c.SDL_GetError()});
+        return error.WindowCreationFailed;
+    };
 }
 
 fn createRenderer(window: *c.SDL_Window) !*c.SDL_Renderer {
-    const renderer = c.SDL_CreateRenderer(
+    return c.SDL_CreateRenderer(
         window,
         -1,
         c.SDL_RENDERER_ACCELERATED | c.SDL_RENDERER_PRESENTVSYNC,
-    );
-    if (renderer) |r| {
-        return r;
-    }
-    std.debug.print("SDL_CreateRenderer error: {s}\n", .{c.SDL_GetError()});
-    return error.RendererCreationFailed;
+    ) orelse {
+        std.debug.print("SDL_CreateRenderer error: {s}\n", .{c.SDL_GetError()});
+        return error.RendererCreationFailed;
+    };
 }
 
 pub fn main() !void {
@@ -50,8 +46,10 @@ pub fn main() !void {
     mainLoop: while (true) {
         var event: c.SDL_Event = undefined;
         while (c.SDL_PollEvent(&event) != 0) {
-            if (event.@"type" == c.SDL_QUIT) {
-                break :mainLoop;
+            const eventType = event.@"type";
+            switch (eventType) {
+                c.SDL_QUIT => break :mainLoop,
+                else => {},
             }
         }
 
