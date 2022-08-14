@@ -1,7 +1,5 @@
 const std = @import("std");
-const c = @cImport({
-    @cInclude("SDL2/SDL.h");
-});
+const c = @import("sdl2api/sdl.zig");
 
 fn initSdl() !void {
     if (c.SDL_Init(c.SDL_INIT_VIDEO) != 0) {
